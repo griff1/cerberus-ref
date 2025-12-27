@@ -19,12 +19,12 @@ This is a reference implementation of a Django API that integrates the Cerberus 
 - Cerberus middleware intercepts all requests and sends metrics to backend
 
 **Cerberus Middleware Integration:**
-- Located in `~/Documents/cerberus/src/cerberus-django/`
+- Located in `../cerberus/src/cerberus-django/` (separate repository)
 - Imported via wrapper (`cerberus_ref/cerberus_middleware.py`) due to hyphens in source package name
 - Middleware captures HTTP request metadata (IP, endpoint, method, scheme)
 - Sends data asynchronously via TCP to backend analytics server
 - Automatically fetches HMAC secret key for PII pseudoanonymization
-- Backend server: `~/Documents/cerberus-int/services/event_ingest/`
+- Backend server: `../cerberus-int/services/event_ingest/` (separate repository)
 
 **Implementation Note:** The Cerberus middleware source uses `cerberus-django` (with hyphens) as the package name, which cannot be directly imported in Python. The file `cerberus_ref/cerberus_middleware.py` uses `importlib` to dynamically load the middleware from the source directory.
 
@@ -197,55 +197,45 @@ DATABASES = {
 }
 ```
 
-## Reference Repositories
+## Related Repositories
 
-### Cerberus Middleware (`~/Documents/cerberus`)
+This reference implementation integrates with two separate repositories co-located in the parent directory. See their respective CLAUDE.md files for details.
+
+### Cerberus Middleware (`../cerberus/`)
+
+Django middleware package for instrumenting applications.
 
 **Key Files:**
 - `src/cerberus-django/middleware.py` - Main middleware implementation
 - `src/cerberus-django/structs.py` - `CoreData` dataclass definition
 - `src/cerberus-django/utils.py` - PII hashing and secret key fetching utilities
 
-**Important Details:**
-- Uses async TCP client to send data to backend
-- Maintains persistent TCP connection with auto-reconnect
-- Handles both ASGI and WSGI Django applications
-- Background task processes metrics queue asynchronously
+See `../cerberus/CLAUDE.md` for detailed middleware documentation.
 
-### Cerberus Backend (`~/Documents/cerberus-int`)
+### Cerberus Backend (`../cerberus-int/`)
 
-**Event Ingest Service** (`services/event_ingest/main.py`):
+Backend infrastructure and microservices for event processing (optional - can use any compatible backend).
+
+**Event Ingest Service:**
 - FastAPI WebSocket server on port 8001 (default)
-- Endpoint: `GET /api/secret-key` - Returns HMAC secret key (requires Bearer token auth)
-- Endpoint: `POST /ws/events` - WebSocket endpoint for event streaming
-- Validates API keys against PostgreSQL database
-- Publishes events to Kafka topics
+- Provides `/api/secret-key` endpoint for HMAC key
+- Validates API keys and publishes to Kafka
 
-**Backend Services:**
-- `event_ingest` - Receives events, publishes to Kafka
-- `event_process` - Consumes Kafka events, stores in PostgreSQL
-- `client_backend` - User/API key management API
-
-**Database Schema:**
-- `users` - User accounts
-- `api_keys` - API keys for authentication (linked to users/clients)
-- `clients` - Client organizations
-- `events` - Partitioned event storage (monthly partitions)
+See `../cerberus-int/CLAUDE.md` for detailed backend documentation.
 
 ## Testing Cerberus Integration
 
 ### Running Backend Locally
 
-Before testing the Django reference app, start the Cerberus backend:
+Before testing the Django reference app, start the Cerberus backend (optional - only if testing full integration):
 
 ```bash
 # Terminal 1: Start event_ingest service
-cd ~/Documents/cerberus-int/services/event_ingest
+cd ../cerberus-int/services/event_ingest
 source venv/bin/activate
 python main.py
 
-# Terminal 2: Start Django reference app
-cd ~/Documents/cerberus-ref
+# Terminal 2: Start Django reference app (from cerberus-ref directory)
 source venv/bin/activate
 python manage.py runserver
 ```

@@ -2,20 +2,26 @@
 Wrapper to import Cerberus middleware from cerberus-django package.
 
 This file exists because the source package uses 'cerberus-django' (with hyphens)
-which cannot be directly imported in Python. We use importlib to load it.
+which cannot be directly imported in Python. We add the package directory to
+sys.path and import it.
 """
-import importlib.util
+import importlib
 import sys
 import os
 
-# Path to the cerberus-django middleware
-CERBERUS_PATH = os.path.expanduser('~/Documents/cerberus/src/cerberus-django/middleware.py')
+# Path to the cerberus/src directory (relative to this file)
+# This file is in cerberus-ref/cerberus_ref/
+# Middleware package is in cerberus/src/cerberus-django/
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_cerberus_src_dir = os.path.abspath(os.path.join(_this_dir, '..', '..', 'cerberus', 'src'))
 
-# Load the middleware module dynamically
-spec = importlib.util.spec_from_file_location("cerberus_middleware_module", CERBERUS_PATH)
-cerberus_module = importlib.util.module_from_spec(spec)
-sys.modules['cerberus_middleware_module'] = cerberus_module
-spec.loader.exec_module(cerberus_module)
+# Add the src directory to Python path so we can import cerberus-django
+if _cerberus_src_dir not in sys.path:
+    sys.path.insert(0, _cerberus_src_dir)
 
-# Export the middleware class
-CerberusMiddleware = cerberus_module.CerberusMiddleware
+# Import the cerberus-django package
+# We use importlib because the package name has hyphens
+cerberus_django = importlib.import_module('cerberus-django')
+
+# Re-export the middleware class (already exported by __init__.py)
+CerberusMiddleware = cerberus_django.CerberusMiddleware
