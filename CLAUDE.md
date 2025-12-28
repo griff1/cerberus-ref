@@ -19,14 +19,14 @@ This is a reference implementation of a Django API that integrates the Cerberus 
 - Cerberus middleware intercepts all requests and sends metrics to backend
 
 **Cerberus Middleware Integration:**
-- Located in `../cerberus/src/cerberus-django/` (separate repository)
-- Imported via wrapper (`cerberus_ref/cerberus_middleware.py`) due to hyphens in source package name
+- Located in `../cerberus/src/cerberus_django/` (separate repository)
+- Imported via wrapper (`cerberus_ref/cerberus_middleware.py`) that adds the cerberus/src directory to Python path
 - Middleware captures HTTP request metadata (IP, endpoint, method, scheme)
 - Sends data asynchronously via TCP to backend analytics server
 - Automatically fetches HMAC secret key for PII pseudoanonymization
 - Backend server: `../cerberus-int/services/event_ingest/` (separate repository)
 
-**Implementation Note:** The Cerberus middleware source uses `cerberus-django` (with hyphens) as the package name, which cannot be directly imported in Python. The file `cerberus_ref/cerberus_middleware.py` uses `importlib` to dynamically load the middleware from the source directory.
+**Implementation Note:** The file `cerberus_ref/cerberus_middleware.py` adds the `../cerberus/src` directory to Python's path, allowing the `cerberus_django` package to be imported normally.
 
 **Data Flow:**
 1. Client makes HTTP request to Django API
@@ -206,9 +206,9 @@ This reference implementation integrates with two separate repositories co-locat
 Django middleware package for instrumenting applications.
 
 **Key Files:**
-- `src/cerberus-django/middleware.py` - Main middleware implementation
-- `src/cerberus-django/structs.py` - `CoreData` dataclass definition
-- `src/cerberus-django/utils.py` - PII hashing and secret key fetching utilities
+- `src/cerberus_django/middleware.py` - Main middleware implementation
+- `src/cerberus_django/structs.py` - `CoreData` dataclass definition
+- `src/cerberus_django/utils.py` - PII hashing and secret key fetching utilities
 
 See `../cerberus/CLAUDE.md` for detailed middleware documentation.
 
