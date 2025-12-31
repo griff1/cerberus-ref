@@ -2,17 +2,10 @@
 Django settings for cerberus_ref project.
 """
 import os
-import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Add the cerberus middleware to Python path (relative to this file)
-# This file is in cerberus-ref/cerberus_ref/, middleware is in cerberus/src/
-CERBERUS_MIDDLEWARE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'cerberus', 'src'))
-if CERBERUS_MIDDLEWARE_PATH not in sys.path:
-    sys.path.insert(0, CERBERUS_MIDDLEWARE_PATH)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-dev-key-change-in-production'
@@ -44,8 +37,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Cerberus middleware - must be after auth middleware to access request.user
-    'cerberus_ref.cerberus_middleware.CerberusMiddleware',
+    # Cerberus middleware - captures HTTP request metrics
+    'cerberus_django.CerberusMiddleware',
 ]
 
 ROOT_URLCONF = 'cerberus_ref.urls'
